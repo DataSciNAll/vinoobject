@@ -30,10 +30,12 @@ python3 -m venv /home/<usr>/venv/openvino_env
 Suggested Local repo on is home/<usr>/github.  If you have it in a differnt location update Path
 
 ```bash
-source /home/biadmin/github/venv/object_detect/bin/activate
+source /home/<usr>/venv/object_detect/bin/activate
 ```
 
 ## 5. Clone the Repository
+
+Change directory to your local git repo on the device
 
 ```bash
 git clone https://github.com/DataSciNAll/vinoobject.git

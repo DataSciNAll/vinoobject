@@ -30,7 +30,7 @@ python3 -m venv /home/<usr>/venv/openvino_env
 Suggested Local repo on is home/<usr>/github.  If you have it in a differnt location update Path
 
 ```bash
-source /home/<usr>/venv/object_detect/bin/activate
+source /home/<usr>/venv/openvino_env/bin/activate
 ```
 
 ## 5. Clone the Repository

@@ -159,13 +159,20 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
             stop_time = time.time()
             # Get poses from network results.
             boxes = process_results(frame=frame, results=results)
-            #boxes = dict(labels=labels, scores=scores, boxes=coordinates,[xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax])
-            #key = [labels, scores, boxes]
-            #boxes = array_to_dict(key,boxes)
-            #boxes= zip(key,boxes)
-            #boxes=dict(boxes)
+            predict_pipeline = []
+            counter = 0
+            for item in boxes:
+                temp_dict = {}
+                temp_dict['Frame'] = counter
+                temp_dict['Time'] = start_time
+                temp_dict['Label'] = item[0]
+                temp_dict['Score'] = item[1]
+                temp_dict['Box'] = {'Xmin': item[2][0], 'Xmax': item[2][1], 'Ymin': item[2][2], 'Ymax': item[2][3]}
+                predict_pipeline.append(temp_dict)
+                counter += 1
+            
             with open("data_file.json", "a") as write_file:
-                json.dump(boxes, write_file)
+                json.dump(predict_pipeline, write_file)
 
             # Draw boxes on a frame.
             frame = draw_boxes(frame=frame, boxes=boxes)

@@ -12,27 +12,48 @@ sudo apt-get upgrade
 sudo apt-get install python3-venv build-essential python3-dev git-all
 ```
 
-## 2. Install the Notebook
+## 2. Create virtual environment folder
 
-After installing Python 3 and Git, run each step below in a terminal. Note: If OpenVINO is installed globally, please do not run any of these commands in a termin>
-
-## 3. Create a Virtual Environment
-
-Note: If you already installed openvino-dev and activated the openvino_env environment, you can skip to [Step 4](#4-clone-the-repository). If you use Anaconda, pl>
+This will be the directory from the root of your home/<usr> directory.  We assume you have setup your local git repo in the same directory but this is optional.  Change the path to your local git repo.
 
 ```bash
-python3 -m venv openvino_env
+mkdir /home/<usr>/venv
+```
+## 3. Create a Virtual Environment
+
+```bash
+python3 -m venv /home/<usr>/venv/openvino_env
 ```
 
 ## 4. Activate the Environment
 
+Suggested Local repo on is home/<usr>/github.  If you have it in a differnt location update Path
+
 ```bash
-source openvino_env/bin/activate
+source /home/biadmin/github/venv/object_detect/bin/activate
 ```
 
 ## 5. Clone the Repository
 
-> Note: Using the `--depth=1` option for git clone reduces download size.
+```bash
+git clone https://github.com/DataSciNAll/vinoobject.git
+```
+
+## 6. Install the Packages
+
+This setup installs OpenVINO and dependencies.  Install PIP to latest version and install dependencies.
 
 ```bash
-git clone --depth=1 https://github.com/DataSciNAll/vinoobject.git
+python -m pip install --upgrade pip 
+pip install wheel setuptools
+pip install -r requirements.txt
+```
+## 7. Setup environment and run python script
+
+Python script is using Public SSDlite_mobilenet_v2 IR file.  It has already been converted to IR format.  This model is trained from the COCO data set
+
+```bash
+python3 /home/<usr>/github/vinoobject/object_detection_script.py
+```
+
+OpenCV leverages Video Player to frame the different video segments and it is configured to leverage Source = 0 which should be the webcam define that is streaming from the local machine to the script.

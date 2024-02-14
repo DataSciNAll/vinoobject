@@ -159,6 +159,11 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
             stop_time = time.time()
             # Get poses from network results.
             boxes = process_results(frame=frame, results=results)
+            #boxes = dict(labels=labels, scores=scores, boxes=coordinates,[xmin=xmin, xmax=xmax, ymin=ymin, ymax=ymax])
+            #key = [labels, scores, boxes]
+            #boxes = array_to_dict(key,boxes)
+            #boxes= zip(key,boxes)
+            #boxes=dict(boxes)
             with open("data_file.json", "a") as write_file:
                 json.dump(boxes, write_file)
 

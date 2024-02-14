@@ -1,0 +1,16 @@
+openvino-dev>=2023.3.0
+openvino-telemetry>=2023.2.1
+nncf==2.8.0
+
+transformers>=4.21.1
+
+# others
+numpy>=1.21.0
+opencv-python
+opencv-python-headless
+Pillow>=8.3.2
+matplotlib>=3.4
+scipy
+
+scikit-image>=0.19.2
+setuptools>=56.0.0

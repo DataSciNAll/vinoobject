@@ -52,7 +52,6 @@ classes = [
     "toaster", "sink", "refrigerator", "blender", "book", "clock", "vase", "scissors",
     "teddy bear", "hair drier", "toothbrush", "hair brush"
 ]
-
 # Colors for the classes above (Rainbow Color Map).
 colors = cv2.applyColorMap(
     src=np.arange(0, 255, 255 / len(classes), dtype=np.float32).astype(np.uint8),
@@ -167,6 +166,7 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
                 temp_dict['Time'] = start_time
                 temp_dict['Label'] = item[0]
                 temp_dict['Score'] = item[1]
+                temp_dict['Label_text'] = classes[item[0]]
                 temp_dict['Box'] = {'Xmin': item[2][0], 'Ymin': item[2][1], 'Xmax': item[2][2], 'Ymax': item[2][3]}
                 predict_pipeline.append(temp_dict)
                 counter += 1

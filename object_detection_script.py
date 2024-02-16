@@ -167,7 +167,7 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
                 temp_dict['Time'] = start_time
                 temp_dict['Label'] = item[0]
                 temp_dict['Score'] = item[1]
-                temp_dict['Box'] = {'Xmin': item[2][0], 'Xmax': item[2][1], 'Ymin': item[2][2], 'Ymax': item[2][3]}
+                temp_dict['Box'] = {'Xmin': item[2][0], 'Ymin': item[2][1], 'Xmax': item[2][2], 'Ymax': item[2][3]}
                 predict_pipeline.append(temp_dict)
                 counter += 1
             

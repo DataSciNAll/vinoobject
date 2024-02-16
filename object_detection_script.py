@@ -7,16 +7,30 @@ import time
 from pathlib import Path
 import videoplayer as utils
 
-#Requires headless version of opencv-python pip install opencv-python-headless
 import cv2
 import numpy as np
 from IPython import display
 import openvino as ov
 from openvino.tools.mo.front import tf as ov_tf_front
 from openvino.tools import mo
+import argparse
 
-precision = "FP16"
-model_name = "ssdlite_mobilenet_v2"
+parser = argparse.ArgumentParser(description="OpenVino Object Detection")
+
+#Add the Arguments
+parser.add_argument('--model',default='ssdlite_mobilenet_v2', type=str, help='The model name')
+parser.add_argument('--precision',default='FP16', type=str, help='Precision of model')
+parser.add_argument('--device_name',default='CPU', type=str, help='Device Name for CPU or GPUs')
+parser.add_argument('--threshold',default=.6, type=float, help='Keep box if above this threshold')
+parser.add_argument('--fps',default=30, type=int, help='Frames per second')
+parser.add_argument('--source',default='0', type=str, help='Device ID or RTSP IP Address')
+parser.add_argument('--popup',default=False, type=bool, help='OpenCV Video window enable or disable')
+parser.add_argument('--output',default="data_file.json", type=str, help='File name for json output on data file')
+
+args=parser.parse_args()
+
+precision = args.precision
+model_name = args.model
 predict_pipeline = []
 
 # The output path for the conversion.
@@ -27,7 +41,7 @@ core = ov.Core()
 model = core.read_model(model=converted_model_path)
 
 # Compile the model for CPU (you can choose manually CPU, GPU etc.)
-compiled_model = core.compile_model(model=model, device_name='CPU')
+compiled_model = core.compile_model(model=model, device_name=args.device_name)
 
 # Get the input and output nodes.
 input_layer = compiled_model.input(0)
@@ -58,7 +72,7 @@ colors = cv2.applyColorMap(
     colormap=cv2.COLORMAP_RAINBOW,
 ).squeeze()
 
-def process_results(frame, results, thresh=0.6):
+def process_results(frame, results, thresh=args.threshold):
     # The size of the original frame.
     h, w = frame.shape[:2]
     # The 'results' variable is a [1, 1, 100, 7] tensor.
@@ -78,7 +92,7 @@ def process_results(frame, results, thresh=0.6):
     # See https://paperswithcode.com/method/non-maximum-suppression
     # This algorithm returns indices of objects to keep.
     indices = cv2.dnn.NMSBoxes(
-        bboxes=boxes, scores=scores, score_threshold=thresh, nms_threshold=0.6
+        bboxes=boxes, scores=scores, score_threshold=thresh, nms_threshold=thresh
     )
 
     # If there are no boxes.
@@ -112,13 +126,13 @@ def draw_boxes(frame, boxes):
     return frame
 
 # Main processing function to run object detection.
-def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frames=0):
+def run_object_detection(source=args.source, flip=False, use_popup=args.popup, skip_first_frames=0):
     counter = 0
     player = None
     try:
         # Create a video player to play with target fps.
         player = utils.VideoPlayer(
-            source=source, flip=flip, fps=30, skip_first_frames=skip_first_frames
+            source=source, flip=flip, fps=args.fps, skip_first_frames=skip_first_frames
         )
         # Start capturing.
         player.start()
@@ -171,7 +185,7 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
                 predict_pipeline.append(temp_dict)
                 counter += 1
             
-            with open("data_file.json", "w+") as write_file:
+            with open(args.output, "w+") as write_file:
                 json.dump(predict_pipeline, write_file, indent = 4)
 
             # Draw boxes on a frame.

@@ -17,6 +17,7 @@ from openvino.tools import mo
 
 precision = "FP16"
 model_name = "ssdlite_mobilenet_v2"
+predict_pipeline = []
 
 # The output path for the conversion.
 converted_model_path = Path("model") / f"{model_name}_{precision.lower()}.xml"
@@ -113,6 +114,7 @@ def draw_boxes(frame, boxes):
 
 # Main processing function to run object detection.
 def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frames=0):
+    counter = 0
     player = None
     try:
         # Create a video player to play with target fps.
@@ -159,8 +161,6 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
             stop_time = time.time()
             # Get poses from network results.
             boxes = process_results(frame=frame, results=results)
-            predict_pipeline = []
-            counter = 0
             for item in boxes:
                 temp_dict = {}
                 temp_dict['Frame'] = counter
@@ -171,8 +171,8 @@ def run_object_detection(source=0, flip=False, use_popup=False, skip_first_frame
                 predict_pipeline.append(temp_dict)
                 counter += 1
             
-            with open("data_file.json", "a") as write_file:
-                json.dump(predict_pipeline, write_file)
+            with open("data_file.json", "w+") as write_file:
+                json.dump(predict_pipeline, write_file, indent = 4)
 
             # Draw boxes on a frame.
             frame = draw_boxes(frame=frame, boxes=boxes)

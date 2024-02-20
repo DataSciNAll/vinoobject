@@ -5,6 +5,7 @@ import json
 import tarfile
 import time
 from pathlib import Path
+from distutils.util import strtobool
 import videoplayer as utils
 
 import cv2
@@ -24,7 +25,7 @@ parser.add_argument('--device_name',default='CPU', type=str, help='Device Name f
 parser.add_argument('--threshold',default=.6, type=float, help='Keep box if above this threshold')
 parser.add_argument('--fps',default=30, type=int, help='Frames per second')
 parser.add_argument('--source',default='0', type=str, help='Device ID or RTSP IP Address')
-parser.add_argument('--popup',default=False, type=bool, help='OpenCV Video window enable or disable')
+parser.add_argument('--popup',default=False, type=lambda x: bool(strtobool(x)), help='OpenCV Video window enable or disable')
 parser.add_argument('--output',default="data_file.json", type=str, help='File name for json output on data file')
 
 args=parser.parse_args()
@@ -132,7 +133,7 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
     try:
         # Create a video player to play with target fps.
         player = utils.VideoPlayer(
-            source=source, flip=flip, fps=args.fps, skip_first_frames=skip_first_frames
+            source=args.source, flip=flip, fps=args.fps, skip_first_frames=skip_first_frames
         )
         # Start capturing.
         player.start()
@@ -243,4 +244,4 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
             cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    run_object_detection(source=0, flip=isinstance(0, int), use_popup=True)
+    run_object_detection(source=args.source, flip=isinstance(0, int), use_popup=args.popup)

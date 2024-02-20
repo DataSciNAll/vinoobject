@@ -24,11 +24,16 @@ parser.add_argument('--precision',default='FP16', type=str, help='Precision of m
 parser.add_argument('--device_name',default='CPU', type=str, help='Device Name for CPU or GPUs')
 parser.add_argument('--threshold',default=.6, type=float, help='Keep box if above this threshold')
 parser.add_argument('--fps',default=30, type=int, help='Frames per second')
-parser.add_argument('--source',default='0', type=str, help='Device ID or RTSP IP Address')
 parser.add_argument('--popup',default=False, type=lambda x: bool(strtobool(x)), help='OpenCV Video window enable or disable')
 parser.add_argument('--output',default="data_file.json", type=str, help='File name for json output on data file')
+parser.add_argument('--source',default='0', help='Device ID or RTSP IP Address')
 
 args=parser.parse_args()
+
+try:
+    args.source = int(args.source)
+except ValueError:
+    pass
 
 precision = args.precision
 model_name = args.model

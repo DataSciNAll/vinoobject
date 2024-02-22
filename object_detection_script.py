@@ -195,7 +195,9 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
                 json.dump(predict_pipeline, write_file, indent = 4)
 
             # Draw boxes on a frame.
+            filename = f'frame_{counter}.jpg'
             frame = draw_boxes(frame=frame, boxes=boxes)
+            cv2.imwrite(filename,frame)
 
             processing_times.append(stop_time - start_time)
             # Use processing times from last 200 frames.

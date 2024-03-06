@@ -183,6 +183,7 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
             for item in boxes:
                 temp_dict = {}
                 temp_dict['Frame'] = counter
+                temp_dict['File name'] = f'frame_{counter}.jpg'
                 temp_dict['Time'] = start_time
                 temp_dict['Label'] = item[0]
                 temp_dict['Score'] = item[1]

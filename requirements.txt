@@ -15,3 +15,4 @@ IPython
 
 scikit-image>=0.19.2
 setuptools>=56.0.0
+azure-iot-device

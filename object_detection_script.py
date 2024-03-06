@@ -14,6 +14,7 @@ from IPython import display
 import openvino as ov
 from openvino.tools.mo.front import tf as ov_tf_front
 from openvino.tools import mo
+from azure.iot.device import IoTHubDeviceClient, Message
 import argparse
 
 parser = argparse.ArgumentParser(description="OpenVino Object Detection")
@@ -134,6 +135,7 @@ def draw_boxes(frame, boxes):
 # Main processing function to run object detection.
 def run_object_detection(source=args.source, flip=False, use_popup=args.popup, skip_first_frames=0):
     counter = 0
+    device_client.connect()
     player = None
     try:
         # Create a video player to play with target fps.
@@ -213,6 +215,15 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
                 thickness=1,
                 lineType=cv2.LINE_AA,
             )
+            #Convert the JSON data to a string
+            json_data = json.dumps(predict_pipeline)
+
+            #Create a message from json data
+            message = Message(json_data)
+            
+            #Send the message to IoT Hub
+            device_client.send_message(message)
+
             #Write frame record to json file
             with open(args.output, "w+") as write_file:
                 json.dump(predict_pipeline, write_file, indent = 4)
@@ -252,6 +263,11 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
             player.stop()
         if use_popup:
             cv2.destroyAllWindows()
+            #Disconnect the message
+            device_client.disconnect()
 
 if __name__ == "__main__":
+    #Create instance of the device client using the connection string from your IoT Hub
+    DEVICE_CONNECTION_STRING="{CONNECTION_STRING}"
+    device_client = IoTHubDeviceClient.create_from_connection_string(DEVICE_CONNECTION_STRING)
     run_object_detection(source=args.source, flip=isinstance(0, int), use_popup=args.popup)

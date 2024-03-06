@@ -25,7 +25,7 @@ parser.add_argument('--device_name',default='CPU', type=str, help='Device Name f
 parser.add_argument('--threshold',default=.6, type=float, help='Keep box if above this threshold')
 parser.add_argument('--fps',default=30, type=int, help='Frames per second')
 parser.add_argument('--popup',default=False, type=lambda x: bool(strtobool(x)), help='OpenCV Video window enable or disable')
-parser.add_argument('--output',default="data_file.json", type=str, help='File name for json output on data file')
+parser.add_argument('--output',default="./data/data_file.json", type=str, help='File name for json output on data file')
 parser.add_argument('--source',default='0', help='Device ID or RTSP IP Address')
 
 args=parser.parse_args()
@@ -189,15 +189,9 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
                 temp_dict['Label_text'] = classes[item[0]]
                 temp_dict['Box'] = {'Xmin': item[2][0], 'Ymin': item[2][1], 'Xmax': item[2][2], 'Ymax': item[2][3]}
                 predict_pipeline.append(temp_dict)
-                counter += 1
-            
-            with open(args.output, "w+") as write_file:
-                json.dump(predict_pipeline, write_file, indent = 4)
 
             # Draw boxes on a frame.
-            filename = f'frame_{counter}.jpg'
             frame = draw_boxes(frame=frame, boxes=boxes)
-            cv2.imwrite(filename,frame)
 
             processing_times.append(stop_time - start_time)
             # Use processing times from last 200 frames.
@@ -218,7 +212,15 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
                 thickness=1,
                 lineType=cv2.LINE_AA,
             )
+            #Write frame record to json file
+            with open(args.output, "w+") as write_file:
+                json.dump(predict_pipeline, write_file, indent = 4)
 
+            #Write frame to storage
+            filename = f'./frame/frame_{counter}.jpg'
+            cv2.imwrite(filename,frame)
+            counter += 1
+            
             # Use this workaround if there is flickering.
             if use_popup:
                 cv2.imshow(winname=title, mat=frame)

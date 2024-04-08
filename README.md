@@ -53,6 +53,8 @@ Copy these files from the cloned repo to your IoT Edge project template
 
 Follow these instructions to setup your RTSP Server and RTSP stream.  
 
+https://github.com/nikkiconley/video-processing/blob/main/convertWebcam2RTSP.md 
+
 * Replace step 1 with these instructions.  
     1. Open Command Prompt for Windows
     2. Type in ```ipconfig```

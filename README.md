@@ -1,39 +1,36 @@
-# OpenVino scripts for Object Detection
+# OpenVino scripts for Object Detection IoT Edge modules and Data pipelines to Azure
 
-OpenVino code set to run Object Detection models
+OpenVino code set to run Object Detection models on IoT Edge devices.  The model scores and frames will be streamed to Azure for Fabric to ingest the data in real-time.
 
-## 1. Install Python, Git and GPU drivers (optional)
+## 1. Create IoT Hub in Azure
 
-You may need to install some additional libraries on Ubuntu Linux. These steps work on a clean install of Ubuntu Desktop 20.04, and should also work on Ubuntu 22.>
+Follow these setup instructions to create a New Azure IoT Hub in your subscription
 
-```
-sudo apt-get update
-sudo apt-get upgrade
-sudo apt-get install python3-venv build-essential python3-dev git-all
-```
+https://learn.microsoft.com/en-us/azure/iot-edge/quickstart?view=iotedge-1.4#create-an-iot-hub
 
-## 2. Create virtual environment folder
+## 2. Register IoT Hub on Edge Device
 
-This will be the directory from the root of your home/<usr> directory.  We assume you have setup your local git repo in the same directory but this is optional.  Change the path to your local git repo.
+Create an IoT Edge Device in IoT Hub and Save connection string
 
-```bash
-mkdir /home/<usr>/venv
-```
-## 3. Create a Virtual Environment
+https://learn.microsoft.com/en-us/azure/iot-edge/quickstart?view=iotedge-1.4#register-an-iot-edge-device 
 
-```bash
-python3 -m venv /home/<usr>/venv/openvino_env
-```
+## 3. Setup EFLOW on Windows 10 IoT Edge OS
 
-## 4. Activate the Environment
+ The setup instructions for EFLOW (IoT Edge for Linux on Windows)
 
-Suggested Local repo on is home/<usr>/github.  If you have it in a differnt location update Path
+ https://learn.microsoft.com/en-us/azure/iot-edge/quickstart?view=iotedge-1.4#install-and-start-the-iot-edge-runtime
 
-```bash
-source /home/<usr>/venv/openvino_env/bin/activate
-```
+## 4. Create an IoT Edge project template in VS Code for Deployments
 
-## 5. Clone the Repository
+ If this is the first time using IoT Edge & Hub in VS Code follow these steps to setup extensions in VS Code.
+
+ https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#set-up-tools
+
+Follow these instructions to setup your VS Code IoT Edge Project template.
+
+https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#create-a-project-template 
+
+## 5. Clone the Repository and copy file into IoT Edge Solution project
 
 Change directory to your local git repo on the device
 
@@ -41,21 +38,113 @@ Change directory to your local git repo on the device
 git clone https://github.com/DataSciNAll/vinoobject.git
 ```
 
-## 6. Install the Packages
+Copy these files from the cloned repo to your IoT Edge project template
+* .env file
+* camera.py
+* deployment_template.json
+* deployment_debug_template.json
+* Dockerfile
+* requirements.txt
+* object_detection_script.py
+* videoplayer.py
+* Model directory and all files in directory
 
-This setup installs OpenVINO and dependencies.  Install PIP to latest version and install dependencies.
+## 6. Setup RTSP feed on Edge device host EFLOW
 
-```bash
-python -m pip install --upgrade pip 
-pip install wheel setuptools
-pip install -r requirements.txt
+Follow these instructions to setup your RTSP Server and RTSP stream.  
+
+* Replace step 1 with these instructions.  
+    1. Open Command Prompt for Windows
+    2. Type in ```ipconfig```
+    3. Go to Header called, "Ethernet Adapter VEthernet".
+    4. Copy IPv4 address and use for RTSP Stream & Dockerfile
+
+## 7. Setup IoT Edge Blob Storage directory on EFLOW machine.
+
+Connect into Eflow VM
 ```
-## 7. Setup environment and run python script
-
-Python script is using Public SSDlite_mobilenet_v2 IR file.  It has already been converted to IR format.  This model is trained from the COCO data set
-
-```bash
-python3 /home/<usr>/github/vinoobject/object_detection_script.py
+Connect-EflowVM
 ```
 
-OpenCV leverages Video Player to frame the different video segments and it is configured to leverage Source = 0 which should be the webcam define that is streaming from the local machine to the script.
+Create directory on server to store image files when created by object_detection_script
+```
+mkdir srv/containerdata
+```
+
+Grant corret permissions to these direcotries so OpenVino module can write to it.
+```	
+sudo chown -R 11000:11000 /srv/containerdata
+```
+```
+sudo chmod -R 700 /srv/containerdata
+```
+
+## 8. Setup configuration files to run in your environment
+1. Change parameter field "<IPADDRESS_VETHERNET>" in Dockerfile to your Ethernet adapter VEthernet IP address.  This should be the same addresss as the RTSP stream.  See Instruction under Step 6 for guidance.
+
+2. Change "<DEVICE_CONNECTION_STRING>" in the object_detection_script.py.  This is the connection string in the IoT Hub.
+3. Update three fields in the deployment_template.json file
+    * "LOCAL_STORAGE_ACCOUNT_NAME=<ENV_VARIABLE>" -- ENV_VARIABLE can be any name you like.  Recommend lowercase
+    * "LOCAL_STORAGE_ACCOUNT_KEY=<ENV_KEY>"  -- Base 64 generated key https://generate.plus/en/base64 
+    * "<Blob_Storage_Connection_String>" -- Update with Primary key from Blob Storage account
+
+## 9. Build & Test Docker Image on local PC
+
+* Install Docker Desktop on your local machine
+
+    https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#install-container-engine
+
+* Install and setup Docker Extension on VS Code
+
+* Right-mouse click on Dockerfile and select 'Build Image'.
+
+## 10. Create a Container Registry
+
+1. For this setup we plan to leverage Azure Container Registry.
+
+2. After you setup the Azure Container Register, update the environment file to these new parameter settings.
+
+    https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#provide-your-registry-credentials-to-the-iot-edge-agent
+
+
+## 11. Publish Docker container to Registry
+
+1. Copy the Container address and update "deployment.template.json" file.  Look for "<ACR_CONTAINER_ADDRESS_VERSION>" and replace it with the ACR <Login server/repository:tag>.  For example, edgesample.azurecr.io/newcontabc:v1.1
+
+    https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#build-and-push-your-solution 
+
+## 12. Generate IoT Deployment Manifest
+
+https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#deploy-modules-to-device)
+
+## 13. View Modules and Status on Device
+
+Run this command to see if the proper modules are on yoru device and their status.  Go to PowerShell and run commands as administrator
+
+```
+Connect-EflowVM
+
+iotedge list
+```
+
+This command will help you troubleshoot any error message as needed.  
+
+```
+iotedge logs <module_name>
+```
+
+Here is documentation that lists all the EFLOW commands in PowerShell.
+
+https://learn.microsoft.com/en-us/azure/iot-edge/reference-iot-edge-for-linux-on-windows-functions?view=iotedge-1.4 
+
+## 14. Storage Explorer connection
+
+Here is the setup instructions to connect Azure Storage Explorer to EFLOW directories.  
+    https://learn.microsoft.com/en-us/azure/iot-edge/how-to-store-data-blob?view=iotedge-1.4#connect-to-your-local-storage-with-azure-storage-explorer
+
+1. Follow step 2 since this is a necessary step to get this to function
+2. Connect to Azure Storage thru a Storage Account and the connection string.  
+3. The IP address for the server requires you to get the IP for the LINUX VM ```Get-EFLOWVMAddr```
+4. Use this IP address and replace it in this generic connection string 
+    DefaultEndpointsProtocol=http;BlobEndpoint=http://<LINUX VM IP Address>:11002/<LOCAL_STORAGE_ACCOUNT_NAME>;AccountName=<LOCAL_STORAGE_ACCOUNT_NAME>;AccountKey=<LOCAL_STORAGE_ACCOUNT_KEY>>;
+5. Create a container named, 'frame' and this will start the upload process

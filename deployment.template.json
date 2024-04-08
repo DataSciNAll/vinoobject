@@ -1,0 +1,141 @@
+{
+  "$schema-template": "4.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.1",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "teladocacr": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_sample",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_sample",
+                "address": "<ACR_Address>"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.4",
+              "createOptions": {}
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.4",
+              "createOptions": {
+                "HostConfig": {
+                  "PortBindings": {
+                    "5671/tcp": [
+                      {
+                        "HostPort": "5671"
+                      }
+                    ],
+                    "8883/tcp": [
+                      {
+                        "HostPort": "8883"
+                      }
+                    ],
+                    "443/tcp": [
+                      {
+                        "HostPort": "443"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "modules": {
+          "openvino": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "<ACR_CONTAINER_ADDRESS_VERSION>",
+              "createOptions": {
+                "ExposedPorts": {
+                  "5678/tcp": {}
+                },
+                "HostConfig": {
+                  "Mounts": [
+                    {
+                      "Target": "/vinoobject/frame",
+                      "Source": "/srv/containerdata",
+                      "Type": "bind",
+                      "ReadOnly": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "blobstorage": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azure-blob-storage",
+              "createOptions": {
+                "Env":[
+                  "LOCAL_STORAGE_ACCOUNT_NAME=<ENV_VARIABLE>",
+                  "LOCAL_STORAGE_ACCOUNT_KEY=<ENV_KEY>"
+                 ],
+                 "HostConfig":{
+                   "Binds": ["/srv/containerdata:/blobroot"],
+                   "PortBindings":{
+                     "11002/tcp": [{"HostPort":"11002"}]
+                   }
+                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.1",
+        "routes": {
+          "openvinoToIoTHub": "FROM /messages/modules/openvino/outputs/* INTO $upstream",
+          "blobstorageToIoTHub": "FROM /messages/modules/blobstorage/outputs/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "blobstorage":{
+      "properties.desired": {
+        "deviceAutoDeleteProperties": {
+          "deleteOn": true,
+          "deleteAfterMinutes": 120,
+          "retainWhileUploading": true
+        },
+        "deviceToCloudUploadProperties": {
+          "uploadOn": true,
+          "uploadOrder": "OldestFirst",
+          "cloudStorageConnectionString": "Blob_Storage_Connection_String",
+          "storageContainersForUpload": {
+            "frame": {
+              "target": "images"
+            }
+          },
+          "deleteAfterUpload": true
+        }
+      }
+    }
+  }
+}

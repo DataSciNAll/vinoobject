@@ -3,16 +3,16 @@
   "modulesContent": {
     "$edgeAgent": {
       "properties.desired": {
-        "schemaVersion": "1.1",
+        "schemaVersion": "1.4",
         "runtime": {
           "type": "docker",
           "settings": {
             "minDockerVersion": "v1.25",
             "loggingOptions": "",
             "registryCredentials": {
-              "teladocacr": {
-                "username": "$CONTAINER_REGISTRY_USERNAME_sample",
-                "password": "$CONTAINER_REGISTRY_PASSWORD_sample",
+              "<ACR_REGISTRY_NAME>": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_<ACR_REGISTRY_NAME>",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_<ACR_REGISTRY_NAME>",
                 "address": "<ACR ADDRESS>"
               }
             }

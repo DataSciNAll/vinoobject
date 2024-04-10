@@ -3,16 +3,16 @@
   "modulesContent": {
     "$edgeAgent": {
       "properties.desired": {
-        "schemaVersion": "1.1",
+        "schemaVersion": "1.4",
         "runtime": {
           "type": "docker",
           "settings": {
             "minDockerVersion": "v1.25",
             "loggingOptions": "",
             "registryCredentials": {
-              "teladocacr": {
-                "username": "$CONTAINER_REGISTRY_USERNAME_sample",
-                "password": "$CONTAINER_REGISTRY_PASSWORD_sample",
+              "<ACR_REGISTRY_NAME>": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_<ACR_REGISTRY_NAME>",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_<ACR_REGISTRY_NAME>",
                 "address": "<ACR_Address>"
               }
             }
@@ -89,16 +89,22 @@
             "settings": {
               "image": "mcr.microsoft.com/azure-blob-storage",
               "createOptions": {
-                "Env":[
+                "Env": [
                   "LOCAL_STORAGE_ACCOUNT_NAME=<ENV_VARIABLE>",
                   "LOCAL_STORAGE_ACCOUNT_KEY=<ENV_KEY>"
-                 ],
-                 "HostConfig":{
-                   "Binds": ["/srv/containerdata:/blobroot"],
-                   "PortBindings":{
-                     "11002/tcp": [{"HostPort":"11002"}]
-                   }
-                 }
+                ],
+                "HostConfig": {
+                  "Binds": [
+                    "/srv/containerdata:/blobroot"
+                  ],
+                  "PortBindings": {
+                    "11002/tcp": [
+                      {
+                        "HostPort": "11002"
+                      }
+                    ]
+                  }
+                }
               }
             }
           }
@@ -107,7 +113,7 @@
     },
     "$edgeHub": {
       "properties.desired": {
-        "schemaVersion": "1.1",
+        "schemaVersion": "1.4",
         "routes": {
           "openvinoToIoTHub": "FROM /messages/modules/openvino/outputs/* INTO $upstream",
           "blobstorageToIoTHub": "FROM /messages/modules/blobstorage/outputs/* INTO $upstream"
@@ -117,7 +123,7 @@
         }
       }
     },
-    "blobstorage":{
+    "blobstorage": {
       "properties.desired": {
         "deviceAutoDeleteProperties": {
           "deleteOn": true,

@@ -1,6 +1,11 @@
 # OpenVino scripts for Object Detection IoT Edge modules and Data pipelines to Azure
 
 OpenVino code set to run Object Detection models on IoT Edge devices.  The model scores and frames will be streamed to Azure for Fabric to ingest the data in real-time.
+## 0. Pre-Requisites
+* Device running Windows IOT
+* WSL Version 2
+* Vidual Studio Code
+* An Azure subscription
 
 ## 1. Create IoT Hub in Azure
 
@@ -62,6 +67,7 @@ https://github.com/nikkiconley/video-processing/blob/main/convertWebcam2RTSP.md
     4. Copy IPv4 address and use for RTSP Stream & Dockerfile
 
 ## 7. Setup IoT Edge Blob Storage directory on EFLOW machine.
+Create a storage account in the same region as your IOT Hub
 
 Connect into Eflow VM
 ```

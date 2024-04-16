@@ -3,7 +3,7 @@
   "modulesContent": {
     "$edgeAgent": {
       "properties.desired": {
-        "schemaVersion": "1.4",
+        "schemaVersion": "1.1",
         "runtime": {
           "type": "docker",
           "settings": {
@@ -113,7 +113,7 @@
     },
     "$edgeHub": {
       "properties.desired": {
-        "schemaVersion": "1.4",
+        "schemaVersion": "1.2",
         "routes": {
           "openvinoToIoTHub": "FROM /messages/modules/openvino/outputs/* INTO $upstream",
           "blobstorageToIoTHub": "FROM /messages/modules/blobstorage/outputs/* INTO $upstream"

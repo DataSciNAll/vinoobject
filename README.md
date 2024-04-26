@@ -113,18 +113,26 @@ sudo chmod -R 700 /srv/containerdata
 ## 9. Setup configuration files to run in your environment in the VS Code Solution
 1. In the Dockerfile, Change parameter field "<IPADDRESS_VETHERNET>" to your Ethernet adapter VEthernet IP address.  This should be the same addresss as the RTSP stream.  See Instruction under Step 4 for guidance.
 
-2. In object_detection_script.py, change "{CONNECTION_STRING}" to the connection string for the device you created.  You can get this from the Azure Portal under the IoT Edge Device you created.  It should look like this:
+2. In object_detection_script.py, change "<CONNECTION_STRING>" to the connection string for the device you created.  You can get this from the Azure Portal under the IoT Edge Device you created.  It should look like this:
 
 ``` 
     "HostName=<your-hub-name>.azure-devices.net;DeviceId=<your-device-name>;SharedAccessKey=<your-device-key>"
 ``` 
 
-3. Update three fields in the deployment_template.json file
+3. In object_detection_script.py, change "<AZURE_STORAGE_CONNECTION_STRING>" to the connection string for the device you created.  You can get this from the Azure Portal under the Azure Blob Storage you created.  It should look like this:
+
+``` 
+    DefaultEndpointsProtocol=https;AccountName=<Account_Name>;AccountKey=<Account_key>;EndpointSuffix=core.windows.net
+``` 
+
+4. In object_detection_script.py, change "<BLOB_CONTAINER_NAME>" to name of the folder you want it to create in your Azure Blob Storage account.  It can create and reuse existing folders.  It is recommended to cleanup the files in this container each time you run the script to properly inventory the files with IoT Hub messages.
+
+5. Update three fields in the deployment_template.json file
     * "LOCAL_STORAGE_ACCOUNT_NAME=<ENV_VARIABLE>" -- ENV_VARIABLE can be any name you like.  Recommend lowercase
     * "LOCAL_STORAGE_ACCOUNT_KEY=<ENV_KEY>"  -- Base 64 generated key https://generate.plus/en/base64 
     * "<Blob_Storage_Connection_String>" -- Update with Primary key from Blob Storage account
 
-4. Update the container registry settings.  You can find these on the Access Keys section of your Azure Container registry
+6. Update the container registry settings.  You can find these on the Access Keys section of your Azure Container registry
 
               "<ACR_REGISTRY_NAME>": {
                 "username": "$CONTAINER_REGISTRY_USERNAME_<ACR_REGISTRY_NAME>",
@@ -137,7 +145,7 @@ sudo chmod -R 700 /srv/containerdata
     * Replace the whole string after password with the password
     * Replace <ACR_Address> with the Login Server 
 
-5. Change <ACR_CONTAINER_ADDRESS_VERSION> to your container registry Login Server plus the name and version.  For example: 
+7. Change <ACR_CONTAINER_ADDRESS_VERSION> to your container registry Login Server plus the name and version.  For example: 
 ```
     myacr.azurecr.io/openvinortsp:v1.1
 ```

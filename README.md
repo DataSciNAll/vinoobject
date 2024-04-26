@@ -44,13 +44,13 @@ https://github.com/nikkiconley/video-processing/blob/main/convertWebcam2RTSP.md
 
 
 
-## 6. Create an IoT Edge project template in VS Code for Deployments
+## 6. Create an IoT Edge project template in VS Code for Deployments **
 
  If this is the first time using IoT Edge & Hub in VS Code follow these steps to setup extensions in VS Code.
 
  https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#set-up-tools
 
-### 6a. Follow these instructions to setup your VS Code IoT Edge Project template.
+### 6a. Follow these instructions to setup your VS Code IoT Edge Project template.  **
 
 https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view=iotedge-1.4&tabs=python&pivots=iotedge-dev-ext#create-a-project-template 
 
@@ -59,7 +59,7 @@ https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view
 3. Module Name: openvino
 4. Docker Image Repository: <your-image-login-server>/openvino
 
-### 6b. Create another module within the current solution
+### 6b. Create another module within the current solution **
 
 1. In the command palette, Select Add IOT Edge Module
 2. Select Deployment Template File : deployment.template.json
@@ -67,7 +67,7 @@ https://learn.microsoft.com/en-us/azure/iot-edge/tutorial-develop-for-linux?view
 4. Module Name: blobstorage
 5. Docker Image Repository: <your-image-login-server>/blobstorage
 
-## 7. Clone the Repository and copy file into IoT Edge Solution project
+## 7. Clone the Repository and copy file into IoT Edge Solution project **
 
 Change directory to your local git repo on the device
 
@@ -87,7 +87,7 @@ Copy these files from the cloned repo to your IoT Edge project template into the
 * Model directory and all files in directory
 
 
-## 8. Setup IoT Edge Blob Storage directory on EFLOW machine.
+## 8. Setup IoT Edge Blob Storage directory on EFLOW machine. **
 1. Create a storage account in the same region as your IOT Hub.  Then create a blob container named images
 
 [Instructions](https://learn.microsoft.com/en-us/azure/storage/common/storage-account-create?tabs=azure-portal)
@@ -110,7 +110,7 @@ sudo chown -R 11000:11000 /srv/containerdata
 sudo chmod -R 700 /srv/containerdata
 ```
 
-## 9. Setup configuration files to run in your environment in the VS Code Solution
+## 9. Setup configuration files to run in your environment in the VS Code Solution **
 1. In the Dockerfile, Change parameter field "<IPADDRESS_VETHERNET>" to your Ethernet adapter VEthernet IP address.  This should be the same addresss as the RTSP stream.  See Instruction under Step 4 for guidance.
 
 2. In object_detection_script.py, change "<CONNECTION_STRING>" to the connection string for the device you created.  You can get this from the Azure Portal under the IoT Edge Device you created.  It should look like this:

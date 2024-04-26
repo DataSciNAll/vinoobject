@@ -14,3 +14,6 @@ IPython
 
 scikit-image>=0.19.2
 azure-iot-device
+azure-storage-blob
+azure-identity
+azure-core

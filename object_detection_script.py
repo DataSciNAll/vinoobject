@@ -4,6 +4,8 @@ import collections
 import json
 import tarfile
 import time
+import os
+import uuid
 from pathlib import Path
 from distutils.util import strtobool
 import videoplayer as utils
@@ -15,6 +17,9 @@ import openvino as ov
 from openvino.tools.mo.front import tf as ov_tf_front
 from openvino.tools import mo
 from azure.iot.device import IoTHubDeviceClient, Message
+from azure.identity import DefaultAzureCredential
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+from azure.core.exceptions import ResourceExistsError
 import argparse
 
 parser = argparse.ArgumentParser(description="OpenVino Object Detection")
@@ -24,7 +29,7 @@ parser.add_argument('--model',default='ssdlite_mobilenet_v2', type=str, help='Th
 parser.add_argument('--precision',default='FP16', type=str, help='Precision of model')
 parser.add_argument('--device_name',default='CPU', type=str, help='Device Name for CPU or GPUs')
 parser.add_argument('--threshold',default=.6, type=float, help='Keep box if above this threshold')
-parser.add_argument('--fps',default=30, type=int, help='Frames per second')
+parser.add_argument('--fps',default=10, type=int, help='Frames per second')
 parser.add_argument('--popup',default=False, type=lambda x: bool(strtobool(x)), help='OpenCV Video window enable or disable')
 parser.add_argument('--output',default="./data/data_file.json", type=str, help='File name for json output on data file')
 parser.add_argument('--source',default='0', help='Device ID or RTSP IP Address')
@@ -78,6 +83,8 @@ colors = cv2.applyColorMap(
     src=np.arange(0, 255, 255 / len(classes), dtype=np.float32).astype(np.uint8),
     colormap=cv2.COLORMAP_RAINBOW,
 ).squeeze()
+
+
 
 def process_results(frame, results, thresh=args.threshold):
     # The size of the original frame.
@@ -228,9 +235,25 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
             with open(args.output, "w+") as write_file:
                 json.dump(predict_pipeline, write_file, indent = 4)
 
-            #Write frame to storage
+            #Variables for local file name, Azure Blob Storage name and container folder
             filename = f'./frame/frame_{counter}.jpg'
-            cv2.imwrite(filename,frame)
+            blobname= f'frame_{counter}.jpg'
+            container_name='<BLOB_CONTAINER_NAME>'
+            
+            #Create Container in Azure Blob Storage if none exists
+            try:
+                container_client = blob_service_client.create_container(container_name)
+            except ResourceExistsError:
+                    pass
+            
+            #Write frame to local storage and sync to Azure Blob Storage
+            blob_client = blob_service_client.get_blob_client(container=container_name,blob=blobname)
+            cv2.imwrite(filename,frame)     
+            with open(filename, "rb") as data:
+                blob_client.upload_blob(data)
+            
+            #Remove file from local storage and adjust counter for filename
+            os.remove(filename)
             counter += 1
             
             # Use this workaround if there is flickering.
@@ -267,7 +290,11 @@ def run_object_detection(source=args.source, flip=False, use_popup=args.popup, s
             device_client.disconnect()
 
 if __name__ == "__main__":
-    #Create instance of the device client using the connection string from your IoT Hub
-    DEVICE_CONNECTION_STRING="{CONNECTION_STRING}"
+    #Connect to IoT Hub to stream messages from Openvino models to Azure
+    DEVICE_CONNECTION_STRING='<CONNECTION_STRING>'
     device_client = IoTHubDeviceClient.create_from_connection_string(DEVICE_CONNECTION_STRING)
+    
+    #Connect to Azure Storage for frames to be saved from device to Azure
+    AZURE_STORAGE_CONNECTION_STRING='<AZURE_STORAGE_CONNECTION_STRING>'
+    blob_service_client = BlobServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
     run_object_detection(source=args.source, flip=isinstance(0, int), use_popup=args.popup)
